@@ -14,8 +14,9 @@ namespace Sim2
 {
     public partial class Form1 : Form
     {
-        int maxX, maxY;
+        int maxX, maxY, count = 20;
         List<Test> tests = new List<Test> { };
+        List<Test> testRando = new List<Test>();
         List<Leader> leaders = new List<Leader>();
         List<Brush> colours = new List<Brush>()
         {
@@ -35,24 +36,30 @@ namespace Sim2
             maxY = this.ClientSize.Height;
             leaders.Add(new Leader(maxX / 2, maxY / 2));
             float a = 5;
+            /*float scale = 0.1f;
             tests.Add(new Test(20,20).setSpeed(a));
-            a -= 0.01f;
+            //a -= scale;
             tests.Add(new Test(maxX-20,20).setSpeed(a));
-            a -= 0.01f;
+            //a -= scale;
             tests.Add(new Test(maxX-20,maxY-20).setSpeed(a));
-            a -= 0.01f;
+            //a -= scale;
             tests.Add(new Test(20, maxY-20).setSpeed(a));
-            a -= 0.01f;
+            //a -= scale;
             tests.Add(new Test(40, maxY - 40).setSpeed(a));
-            a -= 0.01f;
+            //a -= scale;
             tests.Add(new Test(maxX - 40, maxY - 40).setSpeed(a));
-            a -= 0.01f;
+            //a -= scale;
             tests.Add(new Test(maxX - 40, 40).setSpeed(a));
-            a -= 0.01f;
+            //a -= scale;
             tests.Add(new Test(40, 40).setSpeed(a));
             for (int i = 0; i < 8; i++)
             {
                 tests[i].colour = colours[i];
+            }*/
+            for (int i = 0; i < count; i++)
+            {
+                tests.Add(new Test(20, 20).setSpeed(a));
+                tests[i].colour = colours[i%8];
             }
         }
 
@@ -64,10 +71,19 @@ namespace Sim2
             {
                 if (test.move(prev))
                 {
+                    testRando.Add(test);
+                    testRando.Add(prev);
+                }
+                prev = test;
+            }
+            if (testRando.Count > 0)
+            {
+                foreach (Test test in testRando)
+                {
                     test.x = rand.Next(0, maxX);
                     test.y = rand.Next(0, maxY);
                 }
-                prev = test;
+                testRando.Clear();
             }
             leaders[0].move();
             this.Invalidate();
@@ -95,7 +111,7 @@ namespace Sim2
     }
     public class Leader : Test
     {
-        public float midX, midY, rad = 120, speedX, speedY;
+        public float midX, midY, rad = 150, speedX, speedY;
         private bool up = false, right = true;
         public Leader(float newX, float newY) : base(newX, newY)
         {
@@ -107,50 +123,18 @@ namespace Sim2
             x = midX;
             y = midY;
         }
-        public bool move2()
-        {
-            if (x > midX + rad)
-            {
-                right = false;
-            }
-            else if (x < midX - rad)
-            {
-                right = true;
-            }
-            if (y > midY + rad)
-            {
-                up = true;
-            }
-            else if (y < midY - rad)
-            {
-                up = false;
-            }
-            float diffX, diffY;
-            if (up) { diffY = y - (midY+1-rad); }
-            else { diffY = y - (midY+1+rad); }
-            if (right) { diffX = (midX+1+rad)- x; }
-            else { diffX = (midX+1-rad) - x; }
-            float magnitude = 0.2f;
-            if (diffX + diffY > 3)
-            {
-                magnitude = (float)Math.Sqrt(diffX * diffX + diffY * diffY);
-            }
-            diffX /= magnitude; diffY /= magnitude;
-            x += diffX * speed;
-            y -= diffY * speed;
-            return false;
-        }
         float angle = 0;
         public void move()
         { 
             x = rad * (float)Math.Sin(angle) + midX;
             y = rad * (float)Math.Cos(angle) + midY;
             if (angle >= 360) { angle = 0; }
-            else { angle += 0.043f; } //tan-1(target speed / radius) -> (float)Math.Atan2(5,120)
+            else { angle += 0.033f; } //tan-1(target speed / radius) -> (float)Math.Atan2(5,150)
         }                   
     }
     public class Test : Cell
     {
+        float socialDistancing = 50;
         public Test(float newX, float newY) : base()
         {
             size = 30;
@@ -173,8 +157,16 @@ namespace Sim2
             {
                 diffX /= magnitude;
                 diffY /= magnitude;
-                x += diffX * speed;
-                y -= diffY * speed;
+                if (magnitude < target.size / 2 + socialDistancing)
+                {
+                    x += diffX * speed * 0.7f;
+                    y -= diffY * speed * 0.7f;
+                }
+                else
+                {
+                    x += diffX * speed;
+                    y -= diffY * speed;
+                }
                 return false;
             }
             else
