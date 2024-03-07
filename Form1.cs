@@ -15,6 +15,7 @@ namespace Sim2
     public partial class Form1 : Form
     {
         int maxX, maxY, count = 20;
+        bool decreaseSpeed = true;
         List<Test> tests = new List<Test> { };
         List<Test> testRando = new List<Test>();
         List<Leader> leaders = new List<Leader>();
@@ -36,30 +37,15 @@ namespace Sim2
             maxY = this.ClientSize.Height;
             leaders.Add(new Leader(maxX / 2, maxY / 2));
             float a = 5;
-            /*float scale = 0.1f;
-            tests.Add(new Test(20,20).setSpeed(a));
-            //a -= scale;
-            tests.Add(new Test(maxX-20,20).setSpeed(a));
-            //a -= scale;
-            tests.Add(new Test(maxX-20,maxY-20).setSpeed(a));
-            //a -= scale;
-            tests.Add(new Test(20, maxY-20).setSpeed(a));
-            //a -= scale;
-            tests.Add(new Test(40, maxY - 40).setSpeed(a));
-            //a -= scale;
-            tests.Add(new Test(maxX - 40, maxY - 40).setSpeed(a));
-            //a -= scale;
-            tests.Add(new Test(maxX - 40, 40).setSpeed(a));
-            //a -= scale;
-            tests.Add(new Test(40, 40).setSpeed(a));
-            for (int i = 0; i < 8; i++)
-            {
-                tests[i].colour = colours[i];
-            }*/
+            float scale = 0.1f;
             for (int i = 0; i < count; i++)
             {
                 tests.Add(new Test(20, 20).setSpeed(a));
                 tests[i].colour = colours[i%8];
+                if (decreaseSpeed)
+                {
+                    a -= scale;
+                }
             }
         }
 
@@ -129,7 +115,7 @@ namespace Sim2
             x = rad * (float)Math.Sin(angle) + midX;
             y = rad * (float)Math.Cos(angle) + midY;
             if (angle >= 360) { angle = 0; }
-            else { angle += 0.033f; } //tan-1(target speed / radius) -> (float)Math.Atan2(5,150)
+            else { angle += 0.034f; } //tan-1(target speed / radius) -> (float)Math.Atan2(5,150)
         }                   
     }
     public class Test : Cell
@@ -157,15 +143,26 @@ namespace Sim2
             {
                 diffX /= magnitude;
                 diffY /= magnitude;
-                if (magnitude < target.size / 2 + socialDistancing)
-                {
-                    x += diffX * speed * 0.7f;
-                    y -= diffY * speed * 0.7f;
-                }
-                else
+                float distance = magnitude - target.size / 2;
+                if(distance > socialDistancing)
                 {
                     x += diffX * speed;
                     y -= diffY * speed;
+                }
+                else if (distance > socialDistancing * 0.66)
+                {
+                    x += diffX * speed * 0.75f;
+                    y -= diffY * speed * 0.75f;
+                }
+                else if (distance > socialDistancing * 0.33)
+                {
+                    x += diffX * speed * 0.5f;
+                    y -= diffY * speed * 0.5f;
+                }
+                else
+                {
+                    x += diffX * speed * 0.25f;
+                    y -= diffY * speed * 0.25f;
                 }
                 return false;
             }
