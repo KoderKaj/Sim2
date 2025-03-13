@@ -30,6 +30,7 @@
         {
             this.components = new System.ComponentModel.Container();
             this.update = new System.Windows.Forms.Timer(this.components);
+            this.move = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
             // 
             // update
@@ -37,6 +38,12 @@
             this.update.Enabled = true;
             this.update.Interval = 30;
             this.update.Tick += new System.EventHandler(this.update_Tick);
+            // 
+            // move
+            // 
+            this.move.Enabled = true;
+            this.move.Interval = 30;
+            this.move.Tick += new System.EventHandler(this.move_Tick);
             // 
             // Form1
             // 
@@ -46,6 +53,8 @@
             this.Name = "Form1";
             this.Text = "Form1";
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.Form1_Paint);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
+            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyUp);
             this.ResumeLayout(false);
 
         }
@@ -53,6 +62,7 @@
         #endregion
 
         private System.Windows.Forms.Timer update;
+        private System.Windows.Forms.Timer move;
     }
 }
 
